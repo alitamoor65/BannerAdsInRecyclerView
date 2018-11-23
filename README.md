@@ -1,14 +1,13 @@
 # BannerAdsInRecyclerView
 show banner ads in recyclerView with multiple sizes
-
-- Define your data list as following with `Object` type `private List<Object> mRecyclerViewItems = new ArrayList<>();`
-- define your ads interval `final int adsInterval = 8;`
-- Calculate the size of the new data list after adding your banner ads in the recyler list 
+1. Define your data list as following with `Object` type `private List<Object> mRecyclerViewItems = new ArrayList<>();`
+2. define your ads interval `final int adsInterval = 8;`
+3. Calculate the size of the new data list after adding your banner ads in the recyler list 
 ``` 
 int contentItemsEvenSize = contentItems.size() % 2 == 0 ? contentItems.size():contentItems.size()+1;
 int newLength = contentItems.size() + (contentItemsEvenSize/(adsInterval)); 
 ```
-- creat a new updatedfinal data list havving ads
+4. creat a new updatedfinal data list havving ads
 ```
 int counter = 0;
         for (int i = 0; i < newLength; i++) {
@@ -22,7 +21,7 @@ int counter = 0;
         }
  ```
 ![alt text](https://github.com/alitamoor65/BannerAdsInRecyclerView/blob/master/Screenshot_1542174105.png)
--now make your banner ads to full width of the screen
+5. now make your banner ads to full width of the screen
 ```
 GridLayoutManager manager = new GridLayoutManager(this, 2);
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -35,3 +34,38 @@ GridLayoutManager manager = new GridLayoutManager(this, 2);
             }
         });
  ```
+6. `extend` your `RecyclerAdapter` with `RecyclerView.Adapter<RecyclerView.ViewHolder>` 
+7. Override `getItemViewType` in `RecyclerAdapter` class
+```
+@Override
+    public int getItemViewType(int position) {
+        if(mRecyclerViewItems.get(position) instanceof AdsDM){
+            return 2;
+        }
+        return 1;
+    }
+```
+8. In `onCreateViewHolder` method check the current item is wether an ad or your content item as follows
+```
+@NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
+        if(i == 2){
+            View adsView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.add_item,viewGroup,false);
+            return new AdsViewHolder(adsView);
+        }
+
+        View textView = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.text_item,viewGroup,false);
+        return new TextViewHolder(textView);
+    }
+```
+9. In `onBindViewHolder` set your current itemView by checking its type
+```
+if(getItemViewType(i) == 2){
+            ((AdsViewHolder)viewHolder).adView.loadAd(((AdsDM) mRecyclerViewItems.get(i)).getAdRequest());
+            view = ((AdsViewHolder) viewHolder).adView;
+        }else {
+            ((TextViewHolder)viewHolder).textView.setText(((TextDM) mRecyclerViewItems.get(i)).getString());
+            view = ((TextViewHolder) viewHolder).textView;
+        }
+```
